@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "brainrust-engine",
+    "brainrust-cli"
+]
