@@ -1,10 +1,10 @@
 use std::env;
 use std::fs;
+use std::io;
 use std::time::Instant;
 
-use std::io;
-
 use brainrust_engine::interpreter::Interpreter;
+use brainrust_engine::lexer;
 use brainrust_engine::parser;
 
 const MEMORY_SIZE: usize = 32768;
@@ -18,7 +18,7 @@ fn main() {
 
     let contents = fs::read_to_string(file).expect("Something went wrong reading the file");
 
-    let parsed = parser::parse(&contents).expect("Parsing failure");
+    let parsed = parser::parse(lexer::lex(&contents)).expect("Parsing failure");
 
     println!("File parsed");
 
