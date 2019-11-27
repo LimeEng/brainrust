@@ -1,7 +1,29 @@
 use std::io;
 use std::io::Error as IoError;
 
-use crate::instruction::Instruction;
+pub enum Instruction {
+    MoveRight(usize),
+    MoveLeft(usize),
+    Add(usize),
+    Sub(usize),
+    JumpIfZero(usize),
+    JumpIfNotZero(usize),
+    Print,
+    Read,
+}
+
+#[derive(Debug)]
+pub enum Error {
+    Io(IoError),
+    PointerOverflow,
+    PointerUnderflow,
+}
+
+impl From<IoError> for Error {
+    fn from(io_error: IoError) -> Self {
+        Error::Io(io_error)
+    }
+}
 
 pub struct Interpreter {
     memory: Vec<u8>,
@@ -76,18 +98,5 @@ impl Interpreter {
             next_instruction += 1;
         }
         Ok(())
-    }
-}
-
-#[derive(Debug)]
-pub enum Error {
-    Io(IoError),
-    PointerOverflow,
-    PointerUnderflow,
-}
-
-impl From<IoError> for Error {
-    fn from(io_error: IoError) -> Self {
-        Error::Io(io_error)
     }
 }
