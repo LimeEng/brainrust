@@ -1,5 +1,5 @@
-use std::io::Error as IoError;
 use std::io;
+use std::io::Error as IoError;
 
 use crate::instruction::Instruction;
 
