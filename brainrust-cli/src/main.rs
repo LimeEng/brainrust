@@ -5,6 +5,7 @@ use std::time::Instant;
 
 use brainrust_engine::interpreter::Interpreter;
 use brainrust_engine::lexer;
+use brainrust_engine::optimizer;
 use brainrust_engine::parser;
 
 const MEMORY_SIZE: usize = 32768;
@@ -18,9 +19,11 @@ fn main() {
 
     let contents = fs::read_to_string(file).expect("Something went wrong reading the file");
 
-    let parsed = parser::parse(lexer::lex(&contents)).expect("Parsing failure");
+    let tokens = lexer::lex(&contents);
+    let parsed = parser::parse(tokens).expect("Parsing failure");
+    let optimized = optimizer::optimize(parsed);
 
-    println!("File parsed");
+    println!("File parsed and optimized");
 
     let mut interpreter = Interpreter::new(MEMORY_SIZE);
 
@@ -28,7 +31,7 @@ fn main() {
     println!("==================");
 
     let now = Instant::now();
-    let res = interpreter.run(parsed, &mut io::stdin(), &mut io::stdout());
+    let res = interpreter.run(optimized, &mut io::stdin(), &mut io::stdout());
     let elapsed = now.elapsed();
 
     println!("==================");
