@@ -1,6 +1,7 @@
 use std::io;
 use std::io::Error as IoError;
 
+#[derive(Debug, Copy, Clone)]
 pub enum Instruction {
     MoveRight(usize),
     MoveLeft(usize),

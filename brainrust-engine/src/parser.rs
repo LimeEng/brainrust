@@ -16,12 +16,10 @@ pub fn parse(commands: Vec<Command>) -> Result<Vec<Instruction>, Error> {
         })
         .collect();
 
-    link_loops(&mut instructions)?;
-
-    Ok(instructions)
+    link_loops(&mut instructions)
 }
 
-fn link_loops(program: &mut [Instruction]) -> Result<(), Error> {
+pub fn link_loops(program: &mut Vec<Instruction>) -> Result<Vec<Instruction>, Error> {
     let mut jump_stack = Vec::new();
 
     for i in 0..program.len() {
@@ -46,7 +44,7 @@ fn link_loops(program: &mut [Instruction]) -> Result<(), Error> {
             "Opening bracket missing closing bracket",
         )));
     }
-    Ok(())
+    Ok(program.to_vec())
 }
 
 #[derive(Debug)]
