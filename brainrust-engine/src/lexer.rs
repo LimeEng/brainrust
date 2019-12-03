@@ -10,14 +10,7 @@ pub enum Command {
 }
 
 pub fn lex(input: &String) -> Vec<Command> {
-    input
-        .chars()
-        .fold(Vec::with_capacity(input.len()), |mut acc, chr| {
-            if let Some(instruction) = lex_char(chr) {
-                acc.push(instruction);
-            }
-            acc
-        })
+    input.chars().filter_map(lex_char).collect()
 }
 
 fn lex_char(chr: char) -> Option<Command> {
