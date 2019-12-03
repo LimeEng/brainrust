@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 brainrust-engine = { path = "../brainrust-engine" }
+clap = {version = "2.33.0", features = ["color", "wrap_help", "suggestions"]}
