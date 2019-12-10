@@ -11,6 +11,7 @@ pub enum Instruction {
     JumpIfNotZero(usize),
     Print,
     Read,
+    Clear,
 }
 
 #[derive(Debug)]
@@ -94,6 +95,9 @@ impl Interpreter {
                     let mut buffer = [0; 1];
                     input.read(&mut buffer)?;
                     self.write_current_cell(buffer[0]);
+                }
+                Instruction::Clear => {
+                    self.write_current_cell(0);
                 }
             }
             next_instruction += 1;

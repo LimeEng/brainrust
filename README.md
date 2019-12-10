@@ -4,7 +4,7 @@
 
 Brainrust is a simple Brainfuck interpreter written in Rust. [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) is a very simple but still Turing complete language with just eight instructions.
 
-Brainrust consists of two parts, the CLI `brainrust-cli` and the engine `brainrust-engine`. The engine exposes methods to lex, parse, optimize and interpret Brainfuck code. The CLI is currently a thin and ***fragile*** wrapper around the engine.
+Brainrust consists of two parts, the CLI `brainrust-cli` and the engine `brainrust-engine`. The engine exposes methods to lex, parse, optimize and interpret Brainfuck code. The CLI is using the engine to interpret Brainfuck programs and is currently quite minimalistic.
 
 This repository is a [Cargo workspace](https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html) which allows the library to evolve more independently from the CLI and vice versa.
 
@@ -36,7 +36,7 @@ cargo run --release file.b
 
 ## Optimizations
 
-Only two optimization techniques are implemented as of now.
+Below follows a list of optimizations that are currently implemented along with a short description.
 
 **1. Statically linked loops**
 
@@ -59,6 +59,24 @@ Some instructions can be stacked. These stackable instructions (`>`, `<`, `+`, `
 
 ```
 +++++ => [Add(1), Add(1), Add(1), Add(1), Add(1)] => [Add(5)]
+```
+
+**3. Clear loops**
+
+The so called clear loop is a common idiom in Brainfuck. The purpose of the clear loop is to set the current cell to zero which is accomplished with the following loop.
+
+```
+[ - ] => [JumpIfZero(2), Sub(1) JumpIfNotZero(0)] => [Clear]
+```
+
+This can be optimized by replacing the loop with a single custom instruction `Clear`.
+
+**4. Mutation followed by input**
+
+If a cell is mutated and then accept input, the mutation can be omitted. It is unnecessary to carry out instructions that will be replaced by the value of the input.
+
+```
+++++, => [Add(1), Add(1), Add(1), Add(1), Read] => [Read]
 ```
 
 ## Resources
