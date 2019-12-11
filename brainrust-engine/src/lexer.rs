@@ -9,7 +9,7 @@ pub enum Command {
     Read,
 }
 
-pub fn lex(input: &String) -> Vec<Command> {
+pub fn lex(input: &str) -> Vec<Command> {
     input.chars().filter_map(lex_char).collect()
 }
 

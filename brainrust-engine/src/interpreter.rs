@@ -93,8 +93,9 @@ impl Interpreter {
                 }
                 Instruction::Read => {
                     let mut buffer = [0; 1];
-                    input.read(&mut buffer)?;
-                    self.write_current_cell(buffer[0]);
+                    let bytes = input.read(&mut buffer)?;
+                    let value = if bytes > 0 { buffer[0] } else { 0 };
+                    self.write_current_cell(value);
                 }
                 Instruction::Clear => {
                     self.write_current_cell(0);
