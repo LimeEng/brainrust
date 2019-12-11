@@ -1,4 +1,4 @@
-use std::ops::Range;
+use std::ops::RangeInclusive;
 
 use itertools::Itertools;
 
@@ -30,7 +30,7 @@ fn combine_instructions<It: Iterator<Item = Instruction>>(
 fn optimize_clear_loop<It: Iterator<Item = Instruction>>(
     instructions: It,
 ) -> impl Iterator<Item = Instruction> {
-    fn find_clear_loop(instructions: &Vec<Instruction>) -> Option<Range<usize>> {
+    fn find_clear_loop(instructions: &[Instruction]) -> Option<RangeInclusive<usize>> {
         let mut run_started = false;
         let mut start = 0;
         for (i, item) in instructions.iter().enumerate() {
@@ -42,7 +42,7 @@ fn optimize_clear_loop<It: Iterator<Item = Instruction>>(
                 Sub(_a) => { /* noop */ }
                 JumpIfNotZero(_a) => {
                     if run_started {
-                        return Some(start..(i + 1));
+                        return Some(start..=i);
                     }
                 }
                 _ => {
