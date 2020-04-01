@@ -26,12 +26,12 @@ It is also possible to download a pre-built binary for either Windows, Linux or 
 
 If you installed the CLI with cargo or downloaded a pre-built binary, just invoke the binary with a file as argument.
 ```
-brainrust-cli file.b
+brainrust-cli run file.b
 ```
 
 If not, use cargo to run the CLI
 ```
-cargo run --release file.b
+cargo run --release run file.b
 ```
 
 ## Optimizations
