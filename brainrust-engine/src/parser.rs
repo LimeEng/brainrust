@@ -51,3 +51,97 @@ pub fn link_loops(program: &mut Vec<Instruction>) -> Result<Vec<Instruction>, Er
 pub enum Error {
     Syntax(String),
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic_parse() {
+        let input = vec![
+            Command::MoveRight,
+            Command::MoveLeft,
+            Command::Add,
+            Command::Sub,
+            Command::JumpIfZero,
+            Command::JumpIfNotZero,
+            Command::Print,
+            Command::Read,
+        ];
+        let expected = vec![
+            Instruction::MoveRight(1),
+            Instruction::MoveLeft(1),
+            Instruction::Add(1),
+            Instruction::Sub(1),
+            Instruction::JumpIfZero(5),
+            Instruction::JumpIfNotZero(4),
+            Instruction::Print,
+            Instruction::Read,
+        ];
+        assert_eq!(parse(input).unwrap(), expected);
+    }
+
+    #[test]
+    fn test_consecutive_instructions() {
+        let input = vec![
+            Command::JumpIfZero,
+            Command::Add,
+            Command::Add,
+            Command::JumpIfNotZero,
+            Command::Sub,
+            Command::Sub,
+            Command::Sub,
+            Command::Read,
+        ];
+        let expected = vec![
+            Instruction::JumpIfZero(3),
+            Instruction::Add(1),
+            Instruction::Add(1),
+            Instruction::JumpIfNotZero(0),
+            Instruction::Sub(1),
+            Instruction::Sub(1),
+            Instruction::Sub(1),
+            Instruction::Read,
+        ];
+        assert_eq!(parse(input).unwrap(), expected);
+    }
+
+    #[test]
+    fn test_balanced_brackets() {
+        let input = vec![
+            Command::JumpIfZero,
+            Command::JumpIfZero,
+            Command::JumpIfZero,
+            Command::JumpIfZero,
+            Command::Add,
+            Command::JumpIfNotZero,
+            Command::JumpIfNotZero,
+            Command::JumpIfNotZero,
+            Command::JumpIfNotZero,
+        ];
+        let expected = vec![
+            Instruction::JumpIfZero(8),
+            Instruction::JumpIfZero(7),
+            Instruction::JumpIfZero(6),
+            Instruction::JumpIfZero(5),
+            Instruction::Add(1),
+            Instruction::JumpIfNotZero(3),
+            Instruction::JumpIfNotZero(2),
+            Instruction::JumpIfNotZero(1),
+            Instruction::JumpIfNotZero(0),
+        ];
+        assert_eq!(parse(input).unwrap(), expected);
+    }
+
+    #[test]
+    fn test_missing_closing_bracket() {
+        let input = vec![Command::JumpIfZero, Command::Add];
+        assert!(parse(input).is_err());
+    }
+
+    #[test]
+    fn test_missing_opening_bracket() {
+        let input = vec![Command::Add, Command::JumpIfNotZero];
+        assert!(parse(input).is_err());
+    }
+}
