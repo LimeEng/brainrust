@@ -102,8 +102,8 @@ mod tests {
             Clear,
         ];
         let expected = vec![Add(10), Sub(7), MoveLeft(3), MoveRight(4), Clear];
-        let combined: Vec<Instruction> = combine_instructions(input.into_iter()).collect();
-        assert_eq!(combined, expected);
+        let optimized: Vec<Instruction> = combine_instructions(input.into_iter()).collect();
+        assert_eq!(optimized, expected);
     }
 
     #[test]
@@ -123,8 +123,8 @@ mod tests {
             MoveLeft(1),
             MoveRight(1),
         ];
-        let combined: Vec<Instruction> = combine_instructions(input.clone().into_iter()).collect();
-        assert_eq!(combined, input);
+        let optimized: Vec<Instruction> = combine_instructions(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
     }
 
     #[test]
@@ -142,73 +142,73 @@ mod tests {
             Print,
             Print,
         ];
-        let combined: Vec<Instruction> = combine_instructions(input.clone().into_iter()).collect();
-        assert_eq!(combined, input);
+        let optimized: Vec<Instruction> = combine_instructions(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
     }
 
     #[test]
     fn test_combine_empty_input() {
         let input = vec![];
-        let combined: Vec<Instruction> = combine_instructions(input.into_iter()).collect();
-        assert_eq!(combined, vec![]);
+        let optimized: Vec<Instruction> = combine_instructions(input.into_iter()).collect();
+        assert_eq!(optimized, vec![]);
     }
 
     #[test]
     fn test_remove_mutation_empty_input() {
         let input = vec![];
-        let combined: Vec<Instruction> = remove_mutation_before_input(input.into_iter()).collect();
-        assert_eq!(combined, vec![]);
+        let optimized: Vec<Instruction> = remove_mutation_before_input(input.into_iter()).collect();
+        assert_eq!(optimized, vec![]);
     }
 
     #[test]
     fn test_clear_loop_empty_input() {
         let input = vec![];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.into_iter()).collect();
-        assert_eq!(combined, vec![]);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.into_iter()).collect();
+        assert_eq!(optimized, vec![]);
     }
 
     #[test]
     fn test_basic_subtract_clear_loop() {
         use Instruction::*;
         let input = vec![JumpIfZero(2), Sub(1), JumpIfNotZero(0)];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.into_iter()).collect();
-        assert_eq!(combined, vec![Clear]);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.into_iter()).collect();
+        assert_eq!(optimized, vec![Clear]);
     }
 
     #[test]
     fn test_basic_add_clear_loop() {
         use Instruction::*;
         let input = vec![JumpIfZero(2), Add(1), JumpIfNotZero(0)];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.into_iter()).collect();
-        assert_eq!(combined, vec![Clear]);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.into_iter()).collect();
+        assert_eq!(optimized, vec![Clear]);
     }
 
     #[test]
     fn test_combined_subtract_clear_loop() {
         use Instruction::*;
         let input = vec![JumpIfZero(2), Sub(5), JumpIfNotZero(0)];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
-        assert_eq!(combined, input);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
     }
 
     #[test]
     fn test_combined_add_clear_loop() {
         use Instruction::*;
         let input = vec![JumpIfZero(2), Add(5), JumpIfNotZero(0)];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
-        assert_eq!(combined, input);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
     }
 
     #[test]
     fn test_clear_loop_invalid_input() {
         use Instruction::*;
         let input = vec![JumpIfZero(2), Sub(1), Sub(1), JumpIfNotZero(0)];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
-        assert_eq!(combined, input);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
 
         let input = vec![JumpIfZero(4), Sub(1), Sub(1), Sub(1), JumpIfNotZero(0)];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
-        assert_eq!(combined, input);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
 
         let input = vec![
             JumpIfZero(5),
@@ -218,8 +218,8 @@ mod tests {
             Sub(1),
             JumpIfNotZero(0),
         ];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
-        assert_eq!(combined, input);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
 
         let input = vec![
             JumpIfZero(6),
@@ -230,8 +230,8 @@ mod tests {
             Sub(1),
             JumpIfNotZero(0),
         ];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
-        assert_eq!(combined, input);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
 
         let input = vec![
             JumpIfZero(4),
@@ -240,15 +240,42 @@ mod tests {
             JumpIfNotZero(1),
             JumpIfNotZero(0),
         ];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
-        assert_eq!(combined, input);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
 
         let input = vec![JumpIfZero(2), Sub(1), Add(1), JumpIfNotZero(0)];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
-        assert_eq!(combined, input);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
 
         let input = vec![JumpIfZero(1), JumpIfNotZero(0)];
-        let combined: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
-        assert_eq!(combined, input);
+        let optimized: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
+    }
+
+    #[test]
+    fn test_basic_remove_mutation() {
+        use Instruction::*;
+        let input = vec![Add(1), Sub(1), Clear, Read];
+        let optimized: Vec<Instruction> = remove_mutation_before_input(input.into_iter()).collect();
+        let expected = vec![Read];
+        assert_eq!(optimized, expected);
+    }
+
+    #[test]
+    fn test_remove_mutation_invalid_input() {
+        use Instruction::*;
+        let input = vec![JumpIfZero(1), Add(1), Sub(1), Clear, JumpIfNotZero(0), Read];
+        let optimized: Vec<Instruction> =
+            remove_mutation_before_input(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
+    }
+
+    #[test]
+    fn test_remove_mutation_only_read() {
+        use Instruction::*;
+        let input = vec![Read, Read, Read];
+        let optimized: Vec<Instruction> =
+            remove_mutation_before_input(input.clone().into_iter()).collect();
+        assert_eq!(optimized, input);
     }
 }
