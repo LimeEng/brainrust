@@ -71,14 +71,6 @@ The so called clear loop is a common idiom in Brainfuck. The purpose of the clea
 
 This can be optimized by replacing the loop with a single custom instruction `Clear`.
 
-**4. Mutation followed by input**
-
-If a cell is mutated and then accept input, the mutation can be omitted. It is unnecessary to carry out instructions that will be replaced by the value of the input.
-
-```
-++++, => [Add(1), Add(1), Add(1), Add(1), Read] => [Read]
-```
-
 ## Resources
 
 Implementing optimized interpreters/compilers for Brainfuck is certainly nothing novel. Below are some useful resources on the topic.

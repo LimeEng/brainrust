@@ -10,7 +10,6 @@ pub fn optimize(instructions: Vec<Instruction>) -> Vec<Instruction> {
     let iter = instructions.into_iter();
     let iter = combine_instructions(iter);
     let iter = optimize_clear_loop(iter);
-    let iter = remove_mutation_before_input(iter);
     let mut optimized = iter.collect();
     parser::link_loops(&mut optimized).unwrap()
 }
@@ -67,17 +66,6 @@ fn optimize_clear_loop<It: Iterator<Item = Instruction>>(
     }
 
     instructions.into_iter()
-}
-
-fn remove_mutation_before_input<It: Iterator<Item = Instruction>>(
-    instructions: It,
-) -> impl Iterator<Item = Instruction> {
-    instructions.coalesce(|previous, current| match (previous, current) {
-        (Add(_), Read) => Ok(Read),
-        (Sub(_), Read) => Ok(Read),
-        (Clear, Read) => Ok(Read),
-        _ => Err((previous, current)),
-    })
 }
 
 #[cfg(test)]
@@ -150,13 +138,6 @@ mod tests {
     fn test_combine_empty_input() {
         let input = vec![];
         let optimized: Vec<Instruction> = combine_instructions(input.into_iter()).collect();
-        assert_eq!(optimized, vec![]);
-    }
-
-    #[test]
-    fn test_remove_mutation_empty_input() {
-        let input = vec![];
-        let optimized: Vec<Instruction> = remove_mutation_before_input(input.into_iter()).collect();
         assert_eq!(optimized, vec![]);
     }
 
@@ -249,33 +230,6 @@ mod tests {
 
         let input = vec![JumpIfZero(1), JumpIfNotZero(0)];
         let optimized: Vec<Instruction> = optimize_clear_loop(input.clone().into_iter()).collect();
-        assert_eq!(optimized, input);
-    }
-
-    #[test]
-    fn test_basic_remove_mutation() {
-        use Instruction::*;
-        let input = vec![Add(1), Sub(1), Clear, Read];
-        let optimized: Vec<Instruction> = remove_mutation_before_input(input.into_iter()).collect();
-        let expected = vec![Read];
-        assert_eq!(optimized, expected);
-    }
-
-    #[test]
-    fn test_remove_mutation_invalid_input() {
-        use Instruction::*;
-        let input = vec![JumpIfZero(1), Add(1), Sub(1), Clear, JumpIfNotZero(0), Read];
-        let optimized: Vec<Instruction> =
-            remove_mutation_before_input(input.clone().into_iter()).collect();
-        assert_eq!(optimized, input);
-    }
-
-    #[test]
-    fn test_remove_mutation_only_read() {
-        use Instruction::*;
-        let input = vec![Read, Read, Read];
-        let optimized: Vec<Instruction> =
-            remove_mutation_before_input(input.clone().into_iter()).collect();
         assert_eq!(optimized, input);
     }
 }
