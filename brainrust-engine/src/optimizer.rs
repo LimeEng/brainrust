@@ -49,6 +49,8 @@ fn optimize_clear_loop<It: Iterator<Item = Instruction>>(
                         if start + 2 == i {
                             return Some(start..=i);
                         }
+                        // Reset run
+                        run_started = false;
                     }
                 }
                 _ => {
