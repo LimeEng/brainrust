@@ -1,4 +1,4 @@
-![](https://github.com/LimeEng/brainrust/workflows/Rust/badge.svg)
+![](https://github.com/LimeEng/brainrust/workflows/CI/badge.svg)
 
 # Brainrust
 
