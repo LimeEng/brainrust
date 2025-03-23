@@ -1,9 +1,8 @@
-extern crate brainrust_engine;
-use brainrust_engine::interpreter;
-use brainrust_engine::interpreter::Interpreter;
-use brainrust_engine::lexer;
-use brainrust_engine::optimizer;
-use brainrust_engine::parser;
+use brainrust::interpreter;
+use brainrust::interpreter::Interpreter;
+use brainrust::lexer;
+use brainrust::optimizer;
+use brainrust::parser;
 
 use std::fs;
 use std::str;
