@@ -1,12 +1,8 @@
-![](https://github.com/LimeEng/brainrust/workflows/CI/badge.svg)
+[![CI status](https://github.com/LimeEng/brainrust/actions/workflows/ci.yaml/badge.svg)](https://github.com/LimeEng/brainrust/actions/workflows/ci.yaml)
 
 # Brainrust
 
-Brainrust is a simple Brainfuck interpreter written in Rust. [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) is a very simple but still Turing complete language with just eight instructions.
-
-Brainrust consists of two parts, the CLI `brainrust-cli` and the engine `brainrust-engine`. The engine exposes methods to lex, parse, optimize and interpret Brainfuck code. The CLI is using the engine to interpret Brainfuck programs and is currently quite minimalistic.
-
-This repository is a [Cargo workspace](https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html) which allows the library to evolve more independently from the CLI and vice versa.
+Brainrust is a Brainfuck interpreter. [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) is a very simple but still Turing complete language with just eight instructions.
 
 - [Installation](#installation)
 - [Usage](#usage)
@@ -15,24 +11,16 @@ This repository is a [Cargo workspace](https://doc.rust-lang.org/book/ch14-03-ca
 
 ## Installation
 
-Install the CLI by running.
-```
+Install brainrust by either grabbing a [pre-built binary](https://github.com/LimeEng/brainrust/releases) or by running one of these commands.
+
+```sh
+cargo install brainrust
 cargo install --git https://github.com/LimeEng/brainrust
 ```
 
-It is also possible to download a pre-built binary for either Windows, Linux or macOS from the [releases-page](https://github.com/LimeEng/brainrust/releases).
-
 ## Usage
 
-If you installed the CLI with cargo or downloaded a pre-built binary, just invoke the binary with a file as argument.
-```
-brainrust-cli run file.b
-```
-
-If not, use cargo to run the CLI
-```
-cargo run --release run file.b
-```
+Run a brainfuck program by simply running `brainrust run program.b`
 
 ## Optimizations
 
@@ -79,8 +67,8 @@ Implementing optimized interpreters/compilers for Brainfuck is certainly nothing
 - http://calmerthanyouare.org/2015/01/07/optimizing-brainfuck.html
 - http://www.hevanet.com/cristofd/brainfuck/
 - https://github.com/Wilfred/bfc
-- https://www.nayuki.io/page/optimizing-brainfuck-compiler
 - http://www.wilfred.me.uk/blog/2015/08/29/an-optimising-bf-compiler/
+- https://www.nayuki.io/page/optimizing-brainfuck-compiler
 
 Additionally, here are some resources on where to find runnable Brainfuck programs.
 

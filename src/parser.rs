@@ -1,7 +1,6 @@
-use crate::interpreter::Instruction;
-use crate::lexer::Command;
+use crate::{interpreter::Instruction, lexer::Command};
 
-pub fn parse(commands: Vec<Command>) -> Result<Vec<Instruction>, Error> {
+pub fn parse(commands: &[Command]) -> Result<Vec<Instruction>, Error> {
     let mut instructions: Vec<Instruction> = commands
         .iter()
         .map(|cmd| match cmd {
@@ -19,7 +18,7 @@ pub fn parse(commands: Vec<Command>) -> Result<Vec<Instruction>, Error> {
     link_loops(&mut instructions)
 }
 
-pub fn link_loops(program: &mut Vec<Instruction>) -> Result<Vec<Instruction>, Error> {
+pub fn link_loops(program: &mut [Instruction]) -> Result<Vec<Instruction>, Error> {
     let mut jump_stack = Vec::new();
 
     for i in 0..program.len() {
@@ -78,7 +77,7 @@ mod tests {
             Instruction::Print,
             Instruction::Read,
         ];
-        assert_eq!(parse(input).unwrap(), expected);
+        assert_eq!(parse(&input).unwrap(), expected);
     }
 
     #[test]
@@ -103,7 +102,7 @@ mod tests {
             Instruction::Sub(1),
             Instruction::Read,
         ];
-        assert_eq!(parse(input).unwrap(), expected);
+        assert_eq!(parse(&input).unwrap(), expected);
     }
 
     #[test]
@@ -130,18 +129,18 @@ mod tests {
             Instruction::JumpIfNotZero(1),
             Instruction::JumpIfNotZero(0),
         ];
-        assert_eq!(parse(input).unwrap(), expected);
+        assert_eq!(parse(&input).unwrap(), expected);
     }
 
     #[test]
     fn test_missing_closing_bracket() {
         let input = vec![Command::JumpIfZero, Command::Add];
-        assert!(parse(input).is_err());
+        assert!(parse(&input).is_err());
     }
 
     #[test]
     fn test_missing_opening_bracket() {
         let input = vec![Command::Add, Command::JumpIfNotZero];
-        assert!(parse(input).is_err());
+        assert!(parse(&input).is_err());
     }
 }
