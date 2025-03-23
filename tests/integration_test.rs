@@ -1,11 +1,8 @@
-use brainrust::interpreter;
-use brainrust::interpreter::Interpreter;
-use brainrust::lexer;
-use brainrust::optimizer;
-use brainrust::parser;
-
-use std::fs;
-use std::str;
+use brainrust::{
+    interpreter::{self, Interpreter},
+    lexer, optimizer, parser,
+};
+use std::{fs, io, str};
 
 const PROGRAM_PREFIX: &str = "tests/programs/";
 const PROGRAM_EXTENSION: &str = ".b";
@@ -19,18 +16,16 @@ macro_rules! test_programs {
     $(
         #[test]
         fn $test_name() -> Result<(), TestError> {
-            let program = format!("{}{}{}", PROGRAM_PREFIX, $program_name, PROGRAM_EXTENSION);
-            let input = format!("{}{}{}", PROGRAM_PREFIX, $program_name, INPUT_EXTENSION);
-            let output = format!("{}{}{}", PROGRAM_PREFIX, $program_name, OUTPUT_EXTENSION);
+            let program_name = $program_name;
+            let program = format!("{PROGRAM_PREFIX}{program_name}{PROGRAM_EXTENSION}");
+            let input = format!("{PROGRAM_PREFIX}{program_name}{INPUT_EXTENSION}");
+            let output = format!("{PROGRAM_PREFIX}{program_name}{OUTPUT_EXTENSION}");
 
-            let program = fs::read(program)?;
-            let input = fs::read(input)?;
+            let program = fs::read_to_string(program)?;
+            let input = fs::read_to_string(input)?;
             let output = fs::read(output)?;
 
-            let program = str::from_utf8(&program)?;
-            let input = str::from_utf8(&input)?;
-
-            let result = run_program(program, input)?;
+            let result = run_program(&program, &input)?;
 
             assert_eq!(result, output);
             Ok(())
@@ -44,45 +39,45 @@ test_programs! {
 }
 
 fn run_program(file: &str, input: &str) -> Result<Vec<u8>, TestError> {
-    let tokens = lexer::lex(&file);
-    let parsed = parser::parse(tokens)?;
+    let tokens = lexer::lex(file);
+    let parsed = parser::parse(&tokens)?;
     let optimized = optimizer::optimize(parsed);
     let mut interpreter = Interpreter::new(MEMORY_SIZE);
 
     let mut output: Vec<u8> = vec![];
 
-    interpreter.run(optimized, &mut input.as_bytes(), &mut output)?;
+    interpreter.run(&optimized, &mut input.as_bytes(), &mut output)?;
     Ok(output)
 }
 
 #[derive(Debug)]
 enum TestError {
-    Io(std::io::Error),
-    Parsing(parser::Error),
-    Interpreter(interpreter::Error),
-    ConversationError(std::str::Utf8Error),
+    Io,
+    Parsing,
+    Interpreter,
+    ConversationError,
 }
 
-impl From<std::io::Error> for TestError {
-    fn from(io_error: std::io::Error) -> Self {
-        TestError::Io(io_error)
+impl From<io::Error> for TestError {
+    fn from(_error: io::Error) -> Self {
+        TestError::Io
     }
 }
 
 impl From<parser::Error> for TestError {
-    fn from(parser_error: parser::Error) -> Self {
-        TestError::Parsing(parser_error)
+    fn from(_error: parser::Error) -> Self {
+        TestError::Parsing
     }
 }
 
 impl From<interpreter::Error> for TestError {
-    fn from(interpreter_error: interpreter::Error) -> Self {
-        TestError::Interpreter(interpreter_error)
+    fn from(_error: interpreter::Error) -> Self {
+        TestError::Interpreter
     }
 }
 
-impl From<std::str::Utf8Error> for TestError {
-    fn from(utf8_error: std::str::Utf8Error) -> Self {
-        TestError::ConversationError(utf8_error)
+impl From<str::Utf8Error> for TestError {
+    fn from(_error: str::Utf8Error) -> Self {
+        TestError::ConversationError
     }
 }

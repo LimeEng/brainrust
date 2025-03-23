@@ -1,20 +1,9 @@
-use std::env;
-use std::fs;
-use std::io;
-use std::time::Instant;
-
-use brainrust::interpreter;
-use brainrust::interpreter::Interpreter;
-use brainrust::lexer;
-use brainrust::optimizer;
-use brainrust::parser;
-use clap::Arg;
-use clap::ArgAction;
-use clap::ArgMatches;
-use clap::Command;
-use clap::crate_name;
-use clap::crate_version;
-use clap::value_parser;
+use brainrust::{
+    interpreter::{self, Interpreter},
+    lexer, optimizer, parser,
+};
+use clap::{Arg, ArgAction, ArgMatches, Command, crate_name, crate_version, value_parser};
+use std::{env, fs, io, time::Instant};
 
 const DEFAULT_MEMORY_SIZE: usize = 32768;
 const CLI_SUB_CMD_RUN: &str = "run";
@@ -66,16 +55,15 @@ fn main() -> Result<(), CliError> {
                 )
                 .arg(
                     Arg::new(CLI_SUB_CMD_RUN_MEMORY)
-                        .help(&format!(
-                            "Sets the number of memory cells, defaults to {:?}",
-                            DEFAULT_MEMORY_SIZE
+                        .help(format!(
+                            "Sets the number of memory cells, defaults to {DEFAULT_MEMORY_SIZE:?}"
                         ))
                         .long(CLI_SUB_CMD_RUN_MEMORY)
                         .value_parser(value_parser!(u32)),
                 )
                 .arg(
                     Arg::new(CLI_SUB_CMD_RUN_TIME)
-                        .help(&"Prints time of various metrics".to_string())
+                        .help("Prints time of various metrics")
                         .long(CLI_SUB_CMD_RUN_TIME)
                         .value_parser(CLI_SUB_CMD_RUN_TIME_OPTIONS)
                         .action(ArgAction::Append),
@@ -107,14 +95,14 @@ fn handle_run(matches: &ArgMatches) -> Result<(), CliError> {
             let total_start = Instant::now();
             let contents = fs::read_to_string(input)?;
             let tokens = lexer::lex(&contents);
-            let parsed = parser::parse(tokens)?;
+            let parsed = parser::parse(&tokens)?;
             let optimized = optimizer::optimize(parsed);
             let parse_elapsed = total_start.elapsed();
 
             let mut interpreter = Interpreter::new(memory);
 
             let exec_start = Instant::now();
-            interpreter.run(optimized, &mut io::stdin(), &mut io::stdout())?;
+            interpreter.run(&optimized, &mut io::stdin(), &mut io::stdout())?;
             let exec_elapsed = exec_start.elapsed();
             let total_elapsed = total_start.elapsed();
 

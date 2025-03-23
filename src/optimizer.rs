@@ -1,16 +1,18 @@
+use crate::{
+    interpreter::Instruction::{
+        self, Add, Clear, JumpIfNotZero, JumpIfZero, MoveLeft, MoveRight, Sub,
+    },
+    parser,
+};
+use itertools::Itertools;
 use std::ops::RangeInclusive;
 
-use itertools::Itertools;
-
-use crate::interpreter::Instruction;
-use crate::interpreter::Instruction::*;
-use crate::parser;
-
+#[must_use]
 pub fn optimize(instructions: Vec<Instruction>) -> Vec<Instruction> {
     let iter = instructions.into_iter();
     let iter = combine_instructions(iter);
     let iter = optimize_clear_loop(iter);
-    let mut optimized = iter.collect();
+    let mut optimized: Vec<_> = iter.collect();
     parser::link_loops(&mut optimized).unwrap()
 }
 

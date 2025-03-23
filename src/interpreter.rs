@@ -1,5 +1,4 @@
 use std::io;
-use std::io::Error as IoError;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Instruction {
@@ -16,14 +15,14 @@ pub enum Instruction {
 
 #[derive(Debug)]
 pub enum Error {
-    Io(IoError),
+    Io(io::Error),
     PointerOverflow,
     PointerUnderflow,
 }
 
-impl From<IoError> for Error {
-    fn from(io_error: IoError) -> Self {
-        Error::Io(io_error)
+impl From<io::Error> for Error {
+    fn from(error: io::Error) -> Self {
+        Error::Io(error)
     }
 }
 
@@ -33,6 +32,7 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
+    #[must_use]
     pub fn new(memory_size: usize) -> Self {
         Interpreter {
             memory: vec![0; memory_size],
@@ -45,12 +45,12 @@ impl Interpreter {
     }
 
     fn write_current_cell(&mut self, value: u8) {
-        self.memory[self.pointer] = value
+        self.memory[self.pointer] = value;
     }
 
     pub fn run(
         &mut self,
-        program: Vec<Instruction>,
+        program: &[Instruction],
         input: &mut dyn io::Read,
         output: &mut dyn io::Write,
     ) -> Result<(), Error> {
