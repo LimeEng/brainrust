@@ -11,10 +11,9 @@ Brainrust is a Brainfuck interpreter. [Brainfuck](https://en.wikipedia.org/wiki/
 
 ## Installation
 
-Install brainrust by either grabbing a [pre-built binary](https://github.com/LimeEng/brainrust/releases) or by running one of these commands.
+Install brainrust by either grabbing a [pre-built binary](https://github.com/LimeEng/brainrust/releases) or by running this command:
 
 ```sh
-cargo install brainrust
 cargo install --git https://github.com/LimeEng/brainrust
 ```
 
