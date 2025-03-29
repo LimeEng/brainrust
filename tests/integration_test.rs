@@ -2,40 +2,51 @@ use brainrust::{
     interpreter,
     program::{Program, parser},
 };
-use std::{fs, io, str};
-
-const PROGRAM_PREFIX: &str = "tests/programs/";
-const PROGRAM_EXTENSION: &str = ".b";
-const INPUT_EXTENSION: &str = ".input";
-const OUTPUT_EXTENSION: &str = ".output";
 
 const MEMORY_SIZE: usize = 32768;
 
+macro_rules! file_path {
+    ($program:ident, $ext:literal) => {
+        concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/tests/programs/",
+            stringify!($program),
+            $ext
+        )
+    };
+}
+
+macro_rules! include_file {
+    (string, $program:ident, $ext:literal) => {
+        include_str!(file_path!($program, $ext))
+    };
+    (bytes, $program:ident, $ext:literal) => {
+        include_bytes!(file_path!($program, $ext))
+    };
+}
+
 macro_rules! test_programs {
-    ($($test_name:ident: $program_name:expr,)*) => {
+    ($($program:ident,)*) => {
     $(
-        #[test]
-        fn $test_name() -> Result<(), TestError> {
-            let program_name = $program_name;
-            let program = format!("{PROGRAM_PREFIX}{program_name}{PROGRAM_EXTENSION}");
-            let input = format!("{PROGRAM_PREFIX}{program_name}{INPUT_EXTENSION}");
-            let output = format!("{PROGRAM_PREFIX}{program_name}{OUTPUT_EXTENSION}");
+        paste::item! {
+            #[test]
+            fn [< test_ $program >] () -> Result<(), TestError> {
+                let program = include_file!(string, $program, ".b");
+                let input = include_file!(string, $program, ".input");
+                let output = include_file!(bytes, $program, ".output");
 
-            let program = fs::read_to_string(program)?;
-            let input = fs::read_to_string(input)?;
-            let output = fs::read(output)?;
+                let result = run_program(program, input)?;
 
-            let result = run_program(&program, &input)?;
-
-            assert_eq!(result, output);
-            Ok(())
+                assert_eq!(result, output);
+                Ok(())
+            }
         }
     )*
     }
 }
 
 test_programs! {
-    monty: "monty",
+    monty,
 }
 
 fn run_program(file: &str, input: &str) -> Result<Vec<u8>, TestError> {
@@ -53,16 +64,8 @@ fn run_program(file: &str, input: &str) -> Result<Vec<u8>, TestError> {
 
 #[derive(Debug)]
 enum TestError {
-    Io,
     Parsing,
     Interpreter,
-    ConversationError,
-}
-
-impl From<io::Error> for TestError {
-    fn from(_error: io::Error) -> Self {
-        TestError::Io
-    }
 }
 
 impl From<parser::Error> for TestError {
@@ -74,11 +77,5 @@ impl From<parser::Error> for TestError {
 impl From<interpreter::Error> for TestError {
     fn from(_error: interpreter::Error) -> Self {
         TestError::Interpreter
-    }
-}
-
-impl From<str::Utf8Error> for TestError {
-    fn from(_error: str::Utf8Error) -> Self {
-        TestError::ConversationError
     }
 }
