@@ -10,7 +10,7 @@ fn combine_instructions(instructions: &mut Vec<Instruction>) {
     use Instruction as Instr;
 
     // Coalesce the current block
-    util::coalesce_2(instructions, |current, next| match (current, next) {
+    util::coalesce(instructions, |current, next| match (current, next) {
         (Instr::MoveRight(a), Instr::MoveRight(b)) => Some(Instr::MoveRight(a + b)),
         (Instr::MoveLeft(a), Instr::MoveLeft(b)) => Some(Instr::MoveLeft(a + b)),
         (Instr::Add(a), Instr::Add(b)) => Some(Instr::Add(a + b)),
