@@ -1,4 +1,4 @@
-use crate::{interpreter, program::parser};
+use crate::{interpreter, program};
 use clap::{Command, crate_name, crate_version};
 use std::env;
 
@@ -8,7 +8,7 @@ mod util;
 #[derive(Debug)]
 pub enum CliError {
     IoError(std::io::Error),
-    ParsingError(parser::Error),
+    ParsingError(program::Error),
     Interpreter(interpreter::Error),
 }
 
@@ -18,8 +18,8 @@ impl From<std::io::Error> for CliError {
     }
 }
 
-impl From<parser::Error> for CliError {
-    fn from(error: parser::Error) -> Self {
+impl From<program::Error> for CliError {
+    fn from(error: program::Error) -> Self {
         CliError::ParsingError(error)
     }
 }

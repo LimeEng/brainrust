@@ -1,6 +1,6 @@
 use brainrust::{
     interpreter,
-    program::{Program, parser},
+    program::{self, Program},
 };
 
 const MEMORY_SIZE: usize = 32768;
@@ -68,8 +68,8 @@ enum TestError {
     Interpreter,
 }
 
-impl From<parser::Error> for TestError {
-    fn from(_error: parser::Error) -> Self {
+impl From<program::Error> for TestError {
+    fn from(_error: program::Error) -> Self {
         TestError::Parsing
     }
 }

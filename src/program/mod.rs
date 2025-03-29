@@ -1,7 +1,8 @@
-pub mod lexer;
-pub mod optimizer;
-pub mod parser;
-mod util;
+mod lexer;
+mod optimizer;
+mod parser;
+
+pub use parser::Error;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Instruction {
@@ -27,7 +28,7 @@ impl From<Vec<Instruction>> for Program {
 }
 
 impl Program {
-    pub fn parse(input: &str) -> Result<Self, parser::Error> {
+    pub fn parse(input: &str) -> Result<Self, Error> {
         let instructions = parser::parse(input)?;
         Ok(Self { instructions })
     }
