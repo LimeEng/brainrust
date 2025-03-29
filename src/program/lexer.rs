@@ -10,8 +10,8 @@ pub enum Command {
     Read,
 }
 
-pub fn lex(input: &str) -> Vec<Command> {
-    input.chars().filter_map(lex_char).collect()
+pub fn lex(text: &str) -> Vec<Command> {
+    text.chars().filter_map(lex_char).collect()
 }
 
 fn lex_char(chr: char) -> Option<Command> {
@@ -34,46 +34,44 @@ mod tests {
 
     #[test]
     fn test_basic_lex() {
-        use Command::*;
         let input = "><+-[].,";
         let expected = vec![
-            MoveRight,
-            MoveLeft,
-            Add,
-            Sub,
-            JumpIfZero,
-            JumpIfNotZero,
-            Print,
-            Read,
+            Command::MoveRight,
+            Command::MoveLeft,
+            Command::Add,
+            Command::Sub,
+            Command::JumpIfZero,
+            Command::JumpIfNotZero,
+            Command::Print,
+            Command::Read,
         ];
         assert_eq!(lex(input), expected);
     }
 
     #[test]
     fn test_lex_with_unicode() {
-        use Command::*;
         let input = "🦀🦀🦀>🐚🐚<🌴🌴+🌊-🌊[🌊]🌊.🌊,🌊";
         let expected = vec![
-            MoveRight,
-            MoveLeft,
-            Add,
-            Sub,
-            JumpIfZero,
-            JumpIfNotZero,
-            Print,
-            Read,
+            Command::MoveRight,
+            Command::MoveLeft,
+            Command::Add,
+            Command::Sub,
+            Command::JumpIfZero,
+            Command::JumpIfNotZero,
+            Command::Print,
+            Command::Read,
         ];
         assert_eq!(lex(input), expected);
     }
 
     #[test]
     fn test_with_empty_input() {
-        assert_eq!(lex(""), vec![]);
+        assert_eq!(lex(""), []);
     }
 
     #[test]
     fn test_with_invalid_input() {
         let input = "What a beautiful 🦀🦀🦀🐚🐚🌴🌴🌊🌊🌊🌊🌊🌊 ocean landscape!";
-        assert_eq!(lex(input), vec![]);
+        assert_eq!(lex(input), []);
     }
 }

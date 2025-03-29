@@ -1,6 +1,6 @@
 use brainrust::{
-    interpreter::{self, Interpreter},
-    lexer, optimizer, parser,
+    interpreter,
+    program::{Program, parser},
 };
 use std::{fs, io, str};
 
@@ -39,14 +39,15 @@ test_programs! {
 }
 
 fn run_program(file: &str, input: &str) -> Result<Vec<u8>, TestError> {
-    let tokens = lexer::lex(file);
-    let parsed = parser::parse(&tokens)?;
-    let optimized = optimizer::optimize(parsed);
-    let mut interpreter = Interpreter::new(MEMORY_SIZE);
-
+    let mut input = input.as_bytes();
     let mut output: Vec<u8> = vec![];
+    let mut tape = interpreter::Tape::new(&mut input, &mut output, MEMORY_SIZE);
 
-    interpreter.run(&optimized, &mut input.as_bytes(), &mut output)?;
+    let program = Program::parse(file)?;
+    let program = program.optimized();
+
+    tape.execute(&program)?;
+
     Ok(output)
 }
 

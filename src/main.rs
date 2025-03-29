@@ -1,6 +1,6 @@
 use brainrust::{
-    interpreter::{self, Interpreter},
-    lexer, optimizer, parser,
+    interpreter,
+    program::{Program, parser},
 };
 use clap::{Arg, ArgAction, ArgMatches, Command, crate_name, crate_version, value_parser};
 use std::{env, fs, io, time::Instant};
@@ -17,24 +17,23 @@ pub enum CliError {
     IoError(std::io::Error),
     ParsingError(parser::Error),
     InterpreterError(interpreter::Error),
-    ValidationError(String),
 }
 
 impl From<std::io::Error> for CliError {
-    fn from(io_error: std::io::Error) -> Self {
-        CliError::IoError(io_error)
+    fn from(error: std::io::Error) -> Self {
+        CliError::IoError(error)
     }
 }
 
 impl From<parser::Error> for CliError {
-    fn from(parser_error: parser::Error) -> Self {
-        CliError::ParsingError(parser_error)
+    fn from(error: parser::Error) -> Self {
+        CliError::ParsingError(error)
     }
 }
 
 impl From<interpreter::Error> for CliError {
-    fn from(interpreter_error: interpreter::Error) -> Self {
-        CliError::InterpreterError(interpreter_error)
+    fn from(error: interpreter::Error) -> Self {
+        CliError::InterpreterError(error)
     }
 }
 
@@ -44,6 +43,7 @@ fn main() -> Result<(), CliError> {
         .long_version(crate_version!())
         .about("Brainfuck interpreter")
         .arg_required_else_help(true)
+        .subcommand_required(true)
         .subcommand(
             Command::new(CLI_SUB_CMD_RUN)
                 .about("Parses Brainfuck in the specified file and interprets it")
@@ -73,9 +73,7 @@ fn main() -> Result<(), CliError> {
 
     match matches.subcommand() {
         Some((CLI_SUB_CMD_RUN, matches)) => handle_run(matches),
-        _ => Err(CliError::ValidationError(String::from(
-            "Invalid subcommand",
-        ))),
+        _ => unreachable!(),
     }
 }
 
@@ -94,15 +92,16 @@ fn handle_run(matches: &ArgMatches) -> Result<(), CliError> {
 
             let total_start = Instant::now();
             let contents = fs::read_to_string(input)?;
-            let tokens = lexer::lex(&contents);
-            let parsed = parser::parse(&tokens)?;
-            let optimized = optimizer::optimize(parsed);
+            let program = Program::parse(&contents)?;
+            let program = program.optimized();
             let parse_elapsed = total_start.elapsed();
 
-            let mut interpreter = Interpreter::new(memory);
+            let mut input = io::stdin();
+            let mut output = io::stdout();
+            let mut tape = interpreter::Tape::new(&mut input, &mut output, memory);
 
             let exec_start = Instant::now();
-            interpreter.run(&optimized, &mut io::stdin(), &mut io::stdout())?;
+            tape.execute(&program)?;
             let exec_elapsed = exec_start.elapsed();
             let total_elapsed = total_start.elapsed();
 
@@ -127,8 +126,6 @@ fn handle_run(matches: &ArgMatches) -> Result<(), CliError> {
 
             Ok(())
         }
-        None => Err(CliError::ValidationError(String::from(
-            "Input file missing",
-        ))),
+        None => unreachable!(),
     }
 }
