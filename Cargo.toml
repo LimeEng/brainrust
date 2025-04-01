@@ -1,6 +1,6 @@
 [package]
 name = "brainrust"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Emil Englesson <englesson.emil@gmail.com>"]
 edition = "2024"
 description = "Brainfuck interpreter"
