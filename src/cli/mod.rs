@@ -1,36 +1,11 @@
 use crate::{interpreter, program};
 use clap::{Command, crate_name, crate_version};
-use std::env;
+use std::{env, io};
 
 mod run;
 mod util;
 
-#[derive(Debug)]
-pub enum CliError {
-    IoError(std::io::Error),
-    ParsingError(program::Error),
-    Interpreter(interpreter::Error),
-}
-
-impl From<std::io::Error> for CliError {
-    fn from(error: std::io::Error) -> Self {
-        CliError::IoError(error)
-    }
-}
-
-impl From<program::Error> for CliError {
-    fn from(error: program::Error) -> Self {
-        CliError::ParsingError(error)
-    }
-}
-
-impl From<interpreter::Error> for CliError {
-    fn from(error: interpreter::Error) -> Self {
-        CliError::Interpreter(error)
-    }
-}
-
-pub fn run() -> Result<(), CliError> {
+pub fn run() -> Result<(), Error> {
     let matches = Command::new(crate_name!())
         .version(crate_version!())
         .about("Brainfuck interpreter")
@@ -42,5 +17,30 @@ pub fn run() -> Result<(), CliError> {
     match matches.subcommand() {
         Some(("run", matches)) => run::execute(matches),
         _ => unreachable!(),
+    }
+}
+
+#[derive(Debug)]
+pub enum Error {
+    Io(std::io::Error),
+    Parsing(program::Error),
+    Interpreter(interpreter::Error),
+}
+
+impl From<io::Error> for Error {
+    fn from(error: io::Error) -> Self {
+        Error::Io(error)
+    }
+}
+
+impl From<program::Error> for Error {
+    fn from(error: program::Error) -> Self {
+        Error::Parsing(error)
+    }
+}
+
+impl From<interpreter::Error> for Error {
+    fn from(error: interpreter::Error) -> Self {
+        Error::Interpreter(error)
     }
 }

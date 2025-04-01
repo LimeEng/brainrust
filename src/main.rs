@@ -1,5 +1,5 @@
-use brainrust::cli::{self, CliError};
+use brainrust::cli;
 
-fn main() -> Result<(), CliError> {
+fn main() -> Result<(), cli::Error> {
     cli::run()
 }

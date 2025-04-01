@@ -1,77 +1,99 @@
-use super::CliError;
-use crate::{cli::util, interpreter, program::Program};
+use crate::{
+    cli::util,
+    interpreter::{self, Analytics},
+    program::Program,
+};
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
 use std::{fs, io, time::Instant};
 
-const DEFAULT_MEMORY_SIZE: usize = 32768;
+const DEFAULT_MEMORY_SIZE: &str = "32768";
 const ARG_INPUT_FILE: &str = "input";
-const ARG_MEMORY: &str = "memory";
-const ARG_RUN_TIME: &str = "time";
-const ARG_RUN_TIME_OPTIONS: [&str; 3] = ["total", "exec", "parse"];
+const ARG_MEMORY_SIZE: &str = "memory";
+const ARG_TIME: &str = "time";
+const ARG_PROFILE: &str = "profile";
 
 pub fn build_command() -> Command {
     Command::new("run")
-        .about("Parses Brainfuck in the specified file and interprets it")
+        .about("Parse and execute a Brainfuck program from a file")
         .arg(
             Arg::new(ARG_INPUT_FILE)
-                .help("The file to parse")
+                .help("Path to the Brainfuck source file")
                 .index(1)
                 .required(true),
         )
         .arg(
-            Arg::new(ARG_MEMORY)
-                .help(format!(
-                    "Sets the number of memory cells, defaults to {DEFAULT_MEMORY_SIZE:?}"
-                ))
-                .long(ARG_MEMORY)
-                .value_parser(value_parser!(u32)),
+            Arg::new(ARG_MEMORY_SIZE)
+                .help("Number of memory cells")
+                .long(ARG_MEMORY_SIZE)
+                .action(ArgAction::Set)
+                .default_value(DEFAULT_MEMORY_SIZE)
+                .value_parser(value_parser!(usize)),
         )
         .arg(
-            Arg::new(ARG_RUN_TIME)
-                .help("Prints time of various metrics")
-                .long(ARG_RUN_TIME)
-                .value_parser(ARG_RUN_TIME_OPTIONS)
-                .action(ArgAction::Append),
+            Arg::new(ARG_PROFILE)
+                .help("Collect and print program metrics")
+                .long_help("Collect and print program metrics. Substantially increases execution time and memory usage.")
+                .long(ARG_PROFILE)
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new(ARG_TIME)
+                .help("Print parsing and execution time")
+                .long(ARG_TIME)
+                .action(ArgAction::SetTrue),
         )
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<(), CliError> {
+pub fn execute(matches: &ArgMatches) -> Result<(), crate::cli::Error> {
     let input_file = matches
         .get_one::<String>(ARG_INPUT_FILE)
         .expect("Input file is required");
-    let memory = *matches.get_one(ARG_MEMORY).unwrap_or(&DEFAULT_MEMORY_SIZE);
-    let time_metrics: Vec<&str> = matches
-        .get_many::<String>(ARG_RUN_TIME)
-        .unwrap_or_default()
-        .map(String::as_str)
-        .collect();
+    let memory_size = *matches
+        .get_one(ARG_MEMORY_SIZE)
+        .expect("Memory size should have a default value");
+    let should_profile = *matches.get_one::<bool>(ARG_PROFILE).unwrap_or(&false);
+    let print_timings = *matches.get_one::<bool>(ARG_TIME).unwrap_or(&false);
 
-    let total_start = Instant::now();
+    let start = Instant::now();
     let contents = fs::read_to_string(input_file)?;
     let program = Program::parse(&contents)?;
     let program = program.optimized();
-    let parse_elapsed = total_start.elapsed();
+    let parse_elapsed = util::format_duration(start.elapsed());
 
     let mut input = io::stdin();
     let mut output = io::stdout();
-    let mut tape = interpreter::Tape::new(&mut input, &mut output, memory);
 
-    let exec_start = Instant::now();
-    tape.execute(&program)?;
-    let exec_elapsed = exec_start.elapsed();
-    let total_elapsed = total_start.elapsed();
+    let (exec_elapsed, analytics) = if should_profile {
+        let start = Instant::now();
+        let analytics = interpreter::profile(&program, &mut input, &mut output, memory_size)?;
+        (util::format_duration(start.elapsed()), Some(analytics))
+    } else {
+        let start = Instant::now();
+        interpreter::execute(&program, &mut input, &mut output, memory_size)?;
+        (util::format_duration(start.elapsed()), None)
+    };
 
-    if !time_metrics.is_empty() {
+    if let Some(analytics) = analytics {
+        print_analytics(&analytics);
+    }
+
+    if print_timings {
         println!();
-        if time_metrics.contains(&"parse") {
-            println!("Parsing time:   {}", util::format_duration(parse_elapsed));
-        }
-        if time_metrics.contains(&"exec") {
-            println!("Execution time: {}", util::format_duration(exec_elapsed));
-        }
-        if time_metrics.contains(&"total") {
-            println!("Total time:     {}", util::format_duration(total_elapsed));
-        }
+        println!("Parsing time:   {parse_elapsed}");
+        println!("Execution time: {exec_elapsed}");
     }
     Ok(())
+}
+
+fn print_analytics(analytics: &Analytics) {
+    let freq_table = util::build_frequency_table(analytics);
+    let loop_table = util::build_loop_patterns_table(analytics);
+    let misc_table = util::build_misc_table(analytics);
+
+    println!();
+    println!("{freq_table}");
+    println!();
+    println!("{loop_table}");
+    println!();
+    println!("{misc_table}");
 }
