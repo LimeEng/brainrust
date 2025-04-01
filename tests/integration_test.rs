@@ -3,8 +3,6 @@ use brainrust::{
     program::{self, Program},
 };
 
-const MEMORY_SIZE: usize = 32768;
-
 macro_rules! file_path {
     ($program:ident, $ext:literal) => {
         concat!(
@@ -50,14 +48,14 @@ test_programs! {
 }
 
 fn run_program(file: &str, input: &str) -> Result<Vec<u8>, TestError> {
+    const MEMORY_SIZE: usize = 32768;
     let mut input = input.as_bytes();
     let mut output: Vec<u8> = vec![];
-    let mut tape = interpreter::Tape::new(&mut input, &mut output, MEMORY_SIZE);
 
     let program = Program::parse(file)?;
     let program = program.optimized();
 
-    tape.execute(&program)?;
+    interpreter::execute(&program, &mut input, &mut output, MEMORY_SIZE)?;
 
     Ok(output)
 }
