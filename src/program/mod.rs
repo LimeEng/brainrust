@@ -2,6 +2,8 @@ mod lexer;
 mod optimizer;
 mod parser;
 
+use std::collections::HashMap;
+
 pub use parser::Error;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -43,5 +45,25 @@ impl Program {
     #[must_use]
     pub fn instructions(&self) -> &[Instruction] {
         &self.instructions
+    }
+
+    /// Computes Shannon entropy (in bits) for a sequence of instructions.
+    /// [Link](https://en.wikipedia.org/wiki/Entropy_(information_theory))
+    #[must_use]
+    pub fn entropy_in_bits(&self) -> f64 {
+        // TODO: Descend into the loop bodies
+        let total = self.instructions.len() as f64;
+        self.instructions
+            .iter()
+            .fold(HashMap::new(), |mut acc, instr| {
+                *acc.entry(instr).or_insert(0) += 1;
+                acc
+            })
+            .values()
+            .map(|&count| {
+                let p = f64::from(count) / total;
+                -p * p.log2()
+            })
+            .sum()
     }
 }
