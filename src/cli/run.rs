@@ -63,19 +63,15 @@ pub fn execute(matches: &ArgMatches) -> Result<(), crate::cli::Error> {
     let mut input = io::stdin();
     let mut output = io::stdout();
 
-    let (exec_elapsed, analytics) = if should_profile {
-        let start = Instant::now();
+    let start = Instant::now();
+    let exec_elapsed = if should_profile {
         let analytics = interpreter::profile(&program, &mut input, &mut output, memory_size)?;
-        (util::format_duration(start.elapsed()), Some(analytics))
-    } else {
-        let start = Instant::now();
-        interpreter::execute(&program, &mut input, &mut output, memory_size)?;
-        (util::format_duration(start.elapsed()), None)
-    };
-
-    if let Some(analytics) = analytics {
         print_analytics(&analytics);
-    }
+        util::format_duration(start.elapsed())
+    } else {
+        interpreter::execute(&program, &mut input, &mut output, memory_size)?;
+        util::format_duration(start.elapsed())
+    };
 
     if print_timings {
         println!();

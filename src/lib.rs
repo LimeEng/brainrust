@@ -6,5 +6,6 @@
 #![allow(clippy::map_unwrap_or)]
 
 pub mod cli;
+pub mod compiler;
 pub mod interpreter;
 pub mod program;
