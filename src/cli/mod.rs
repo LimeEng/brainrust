@@ -22,7 +22,7 @@ pub fn run() -> Result<(), Error> {
 
 #[derive(Debug)]
 pub enum Error {
-    Io(std::io::Error),
+    Io(io::Error),
     Parsing(program::Error),
     Interpreter(interpreter::Error),
 }
